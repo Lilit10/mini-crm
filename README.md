@@ -21,7 +21,7 @@ docker compose up -d --build
 docker compose exec app composer install
 docker compose exec app cp .env.example .env
 docker compose exec app php artisan key:generate
-docker compose exec app php artisan migrate
+docker compose exec app php artisan migrate:fresh --seed
 ```
 
 3) Открыть приложение:
@@ -34,11 +34,17 @@ docker compose exec app php artisan migrate
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate
+php artisan migrate:fresh --seed
 php artisan serve
 ```
 
 ## Полезные команды
+
+- Тестовые данные (после `php artisan migrate:fresh --seed`):
+  - менеджер: `manager@example.com`
+  - пароль: `password`
+  - роль: `manager`
+  - создаются 3 клиента и 6 заявок (статус `new`)
 
 - Тесты:
 
