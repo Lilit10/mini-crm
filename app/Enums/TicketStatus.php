@@ -8,4 +8,3 @@ enum TicketStatus: string
     case InProgress = 'in_progress';
     case Processed = 'processed';
 }
-

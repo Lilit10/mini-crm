@@ -10,6 +10,9 @@ Route::get('/', function () {
 });
 
 Route::get('/widget', WidgetController::class)->name('widget');
+Route::get('/feedback-widget', WidgetController::class)->name('feedback-widget');
+
+Route::view('/docs', 'docs')->name('docs');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');

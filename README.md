@@ -29,6 +29,7 @@ docker compose exec app php artisan migrate:fresh --seed
 
 - приложение: `http://localhost:8080`
 - **виджет (форма заявки):** `http://localhost:8080/widget`
+- **API docs (Swagger UI):** `http://localhost:8080/docs`
 
 ## Локальный запуск (без Docker)
 
@@ -42,10 +43,13 @@ php artisan serve
 ```
 
 Виджет: `http://127.0.0.1:8000/widget`
+API docs (Swagger UI): `http://127.0.0.1:8000/docs`
 
 ## Виджет (iframe)
 
 Страница `GET /widget` отдаёт оформленную форму и отправляет данные на **`POST /api/tickets`** через `fetch` (JSON-ответы и ошибки валидации).
+
+Также доступен алиас: `GET /feedback-widget`.
 
 Пример вставки на другой сайт:
 
@@ -72,6 +76,9 @@ php artisan serve
 
 Тестовые креды (после `php artisan migrate:fresh --seed`):
 
+- `admin@example.com`
+- `password`
+
 - `manager@example.com`
 - `password`
 
@@ -96,12 +103,17 @@ curl -s -X POST http://127.0.0.1:8000/api/tickets \
 curl -s http://127.0.0.1:8000/api/tickets/statistics -H "Accept: application/json"
 ```
 
+## OpenAPI / Swagger
+
+- Спека: `public/openapi.yaml`
+- UI: `GET /docs`
+
 ## Полезные команды
 
 - Тестовые данные (после `php artisan migrate:fresh --seed`):
-  - менеджер: `manager@example.com`
-  - пароль: `password`
-  - роль: `manager`
+  - админ: `admin@example.com` (роль `admin`)
+  - менеджер: `manager@example.com` (роль `manager`)
+  - пароль для обоих: `password`
   - создаются 3 клиента и 6 заявок (статус `new`)
 
 - Тесты:

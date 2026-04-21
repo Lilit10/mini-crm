@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: mini-crm API
+  version: 1.0.0
+  description: |
+    Public API used by the embedded widget to create support tickets and fetch basic statistics.
+servers:
+  - url: http://localhost:8080
+    description: Docker (default)
+  - url: http://127.0.0.1:8000
+    description: Local dev (artisan serve)
+
+paths:
+  /api/tickets:
+    post:
+      summary: Create ticket
+      description: |
+        Create a new ticket. Supports JSON (no files) or multipart/form-data (files: HTML forms often use `attachments[]`; OpenAPI property name is `attachments`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTicketRequest'
+          multipart/form-data:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CreateTicketRequest'
+                - type: object
+                  properties:
+                    attachments:
+                      type: array
+                      items:
+                        type: string
+                        format: binary
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketResponse'
+        '422':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /api/tickets/statistics:
+    get:
+      summary: Tickets statistics
+      description: Returns totals and breakdown by status for day/week/month.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketStatisticsResponse'
+
+components:
+  schemas:
+    CreateTicketRequest:
+      type: object
+      required: [name, phone_e164, subject, message]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+          example: John Doe
+        phone_e164:
+          type: string
+          example: +15551234567
+          description: Phone number in E.164 format.
+        email:
+          type: string
+          nullable: true
+          maxLength: 255
+          example: john@example.com
+        subject:
+          type: string
+          maxLength: 255
+          example: Need help
+        message:
+          type: string
+          maxLength: 10000
+          example: Hello!
+    TicketResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Ticket'
+    Ticket:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        customer:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: John Doe
+            phone_e164:
+              type: string
+              example: +15551234567
+            email:
+              type: string
+              nullable: true
+              example: john@example.com
+        subject:
+          type: string
+          example: Need help
+        message:
+          type: string
+          example: Hello!
+        status:
+          type: string
+          enum: [new, in_progress, processed]
+        manager_replied_at:
+          type: string
+          nullable: true
+          example: 2026-04-21T10:00:00Z
+        created_at:
+          type: string
+          example: 2026-04-21T09:00:00Z
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              file_name:
+                type: string
+                example: note.pdf
+              url:
+                type: string
+                example: http://localhost:8080/storage/1/note.pdf
+    TicketStatisticsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            day:
+              $ref: '#/components/schemas/PeriodStats'
+            week:
+              $ref: '#/components/schemas/PeriodStats'
+            month:
+              $ref: '#/components/schemas/PeriodStats'
+    PeriodStats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 2
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            new: 1
+            processed: 1
+    ValidationError:
+      type: object
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            phone_e164:
+              - The phone number must be in E.164 format (e.g. +15551234567).
+

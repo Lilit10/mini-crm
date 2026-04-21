@@ -9,6 +9,7 @@ use Spatie\Permission\PermissionRegistrar;
 class RolesAndPermissionsSeeder extends Seeder
 {
     public const string ROLE_ADMIN = 'admin';
+
     public const string ROLE_MANAGER = 'manager';
 
     public function run(): void

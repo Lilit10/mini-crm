@@ -16,4 +16,3 @@ class TicketStatisticsResource extends JsonResource
         ];
     }
 }
-
