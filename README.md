@@ -61,6 +61,20 @@ php artisan serve
 
 Замените `https://your-domain.com` на свой `APP_URL`.
 
+## Админ-панель менеджера (Blade)
+
+- Логин: `GET /login`
+- Выход: `POST /logout`
+- Список заявок: `GET /manager/tickets` (фильтры по дате/статусу/email/телефону)
+- Карточка заявки: `GET /manager/tickets/{id}` (вложения + смена статуса)
+
+Доступ ограничен middleware: `auth` + `role:manager`.
+
+Тестовые креды (после `php artisan migrate:fresh --seed`):
+
+- `manager@example.com`
+- `password`
+
 ## API (кратко)
 
 Все ответы — через API Resources (`Accept: application/json`).

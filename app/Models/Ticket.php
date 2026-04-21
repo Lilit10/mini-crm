@@ -35,12 +35,23 @@ class Ticket extends Model implements HasMedia
     }
 
     /**
-     * @param Builder<Ticket> $query
+     * @param  Builder<Ticket>  $query
      * @return Builder<Ticket>
      */
     public function scopeCreatedBetween(Builder $query, CarbonInterface $from, CarbonInterface $to): Builder
     {
         return $query->whereBetween('created_at', [$from, $to]);
+    }
+
+    public function setStatus(TicketStatus $status, CarbonInterface $now): void
+    {
+        $current = $this->status;
+
+        if ($status === TicketStatus::Processed && $current !== TicketStatus::Processed) {
+            $this->manager_replied_at = $now;
+        }
+
+        $this->status = $status;
     }
 
     public function registerMediaCollections(): void
