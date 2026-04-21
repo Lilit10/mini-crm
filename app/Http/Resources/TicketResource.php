@@ -23,10 +23,13 @@ class TicketResource extends JsonResource
             ],
             'subject' => $this->resource->subject,
             'message' => $this->resource->message,
-            'status' => $this->resource->status?->value ?? $this->status,
+            'status' => $this->resource->status?->value ?? $this->resource->status,
             'manager_replied_at' => $this->resource->manager_replied_at?->toISOString(),
             'created_at' => $this->resource->created_at?->toISOString(),
+            'attachments' => $this->resource->getMedia('attachments')->map(fn ($media) => [
+                'file_name' => $media->file_name,
+                'url' => $media->getUrl(),
+            ])->values()->all(),
         ];
     }
 }
-

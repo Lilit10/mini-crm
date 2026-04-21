@@ -9,11 +9,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Ticket extends Model
+class Ticket extends Model implements HasMedia
 {
     /** @use HasFactory<TicketFactory> */
     use HasFactory;
+
+    use InteractsWithMedia;
 
     protected $fillable = ['customer_id', 'subject', 'message', 'status', 'manager_replied_at'];
 
@@ -31,12 +35,16 @@ class Ticket extends Model
     }
 
     /**
-     * @param  Builder<Ticket>  $query
+     * @param Builder<Ticket> $query
      * @return Builder<Ticket>
      */
     public function scopeCreatedBetween(Builder $query, CarbonInterface $from, CarbonInterface $to): Builder
     {
         return $query->whereBetween('created_at', [$from, $to]);
     }
-}
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('attachments')->useDisk('public');
+    }
+}

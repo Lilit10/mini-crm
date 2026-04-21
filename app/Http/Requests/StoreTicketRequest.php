@@ -27,6 +27,8 @@ class StoreTicketRequest extends FormRequest
             ],
             'subject' => ['required', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:10000'],
+            'attachments' => ['nullable', 'array', 'max:5'],
+            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,pdf,doc,docx', 'max:10240'],
         ];
     }
 

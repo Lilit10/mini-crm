@@ -10,12 +10,16 @@ use App\Http\Resources\TicketResource;
 use App\Http\Resources\TicketStatisticsResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Arr;
 
 class TicketController extends Controller
 {
     public function store(StoreTicketRequest $request, CreateTicketAction $action): JsonResponse
     {
-        $ticket = $action->execute($request->validated());
+        $data = $request->validated();
+        unset($data['attachments']);
+
+        $ticket = $action->handle($data, Arr::wrap($request->file('attachments')));
 
         return (new TicketResource($ticket))
             ->response()

@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Ticket;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class TicketsApiTest extends TestCase
@@ -36,6 +37,60 @@ class TicketsApiTest extends TestCase
         $this->assertDatabaseHas('tickets', [
             'subject' => 'Need help',
         ]);
+    }
+
+    public function test_can_create_ticket_with_attachments(): void
+    {
+        $file = UploadedFile::fake()->create('note.pdf', 50, 'application/pdf');
+
+        $response = $this->post('/api/tickets', [
+            'name' => 'Jane',
+            'phone_e164' => '+15559876543',
+            'email' => 'jane@example.com',
+            'subject' => 'With file',
+            'message' => 'See attachment',
+            'attachments' => [$file],
+        ], ['Accept' => 'application/json']);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.attachments.0.file_name', 'note.pdf');
+    }
+
+    public function test_validation_fails_when_attachments_exceed_max_count(): void
+    {
+        $files = [];
+        for ($i = 0; $i < 6; $i++) {
+            $files[] = UploadedFile::fake()->create("doc{$i}.pdf", 10, 'application/pdf');
+        }
+
+        $response = $this->post('/api/tickets', [
+            'name' => 'Test',
+            'phone_e164' => '+15558888001',
+            'email' => 'maxfiles@example.com',
+            'subject' => 'Too many files',
+            'message' => 'Hello',
+            'attachments' => $files,
+        ], ['Accept' => 'application/json']);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['attachments']);
+    }
+
+    public function test_validation_fails_when_attachment_exceeds_max_size(): void
+    {
+        $file = UploadedFile::fake()->create('heavy.pdf', 10241, 'application/pdf');
+
+        $response = $this->post('/api/tickets', [
+            'name' => 'Test',
+            'phone_e164' => '+15558888002',
+            'email' => 'bigfile@example.com',
+            'subject' => 'Too large',
+            'message' => 'Hello',
+            'attachments' => [$file],
+        ], ['Accept' => 'application/json']);
+
+        $response->assertUnprocessable();
+        $response->assertJsonValidationErrors(['attachments.0']);
     }
 
     public function test_validation_fails_for_invalid_phone(): void
@@ -139,4 +194,3 @@ class TicketsApiTest extends TestCase
         $response->assertJsonPath('data.month.total', 3);
     }
 }
-
