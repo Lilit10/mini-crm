@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\TicketStatus;
+use Carbon\CarbonInterface;
 use Database\Factories\TicketFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +28,15 @@ class Ticket extends Model
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * @param  Builder<Ticket>  $query
+     * @return Builder<Ticket>
+     */
+    public function scopeCreatedBetween(Builder $query, CarbonInterface $from, CarbonInterface $to): Builder
+    {
+        return $query->whereBetween('created_at', [$from, $to]);
     }
 }
 
